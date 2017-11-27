@@ -18,7 +18,7 @@ async function readFile(file) {
 async function parseFile(file) {
     var parser = new xml2js.Parser();
     return new Promise( (resolve, reject) => parser.parseString(file, (err, data) => resolve(data)))
-    .catch((e) => console.log(e.message))
+    .catch((e) => console.info(e.message))
 }
 
 function generateFolderPath (allFolders, targetId) {
@@ -37,7 +37,7 @@ function generateFolderPath (allFolders, targetId) {
 }
 
 function getParentFolderId(element) {
-    return element['parent'][0];
+    return (element['parent'] && element['parent'][0]);
 }
 
 function getFoldersById(folders, targetId) {
@@ -47,18 +47,19 @@ function getFoldersById(folders, targetId) {
     return filtered;
 }
 
-async function copyFolderContent(allContent, targetId) {
+async function copyFolderContent(allContent, contentDirectories) {
     const filtered = allContent.filter((element, index) => {
-        return isInFolder(element, targetId);
+        const val = isInFolder(element, contentDirectories);
+        return val;//isInFolder(element, contentDirectories);
     });
     return Promise.resolve(filtered); // TODO: Get subdirectory content;
 }
 
-function isInFolder(content, targetId) {
+function isInFolder(content, contentDirectories) {
     if (content['folder-links']) {
         return content['folder-links'].reduce((outerAcc, curr) => {
             return outerAcc || curr['classification-link'].reduce((innerAcc, curr) => {
-                return innerAcc || (curr['$']['folder-id'] === targetId);
+                return innerAcc || (contentDirectories.indexOf(curr['$']['folder-id']) > -1);
             }, outerAcc);
         }, false);
     }
@@ -74,9 +75,14 @@ async function copyFolderDefinitions(allFolders, folderPath) {
 }
 
 async function processFile(library, targetId) {
+    let contentDirectories = [targetId]
+    if (argv.subdirectories) {
+        contentDirectories = generateChildPath(library['folder'], contentDirectories);
+    }
     const folderPath = generateFolderPath(library['folder'], targetId);
-    const folders = copyFolderDefinitions(library['folder'], folderPath);
-    const targetContent = copyFolderContent(library['content'], targetId);
+    const folders = copyFolderDefinitions(library['folder'], folderPath.concat(contentDirectories));
+
+    const targetContent = copyFolderContent(library['content'], contentDirectories);
 
     return Promise.all([folders, targetContent]).then((values) => {
         return {
@@ -84,7 +90,17 @@ async function processFile(library, targetId) {
             "content": values[1]
         }
     })
-    .catch((e) => console.log(e.message));
+    .catch((e) => console.info(e.message));
+}
+
+function generateChildPath(allFolders, contentDirectories) {
+    let children = contentDirectories;
+    for (var i = 0; i < children.length; i++) {
+        children = Array.from(new Set(children.concat(allFolders.filter((element, index) => {
+                return children.indexOf(getParentFolderId(element)) > -1;
+            }).map(element => element['$']['folder-id']))));
+    }
+    return children;
 }
 
 async function buildFile(xmlAsJson, library) {
@@ -139,14 +155,17 @@ async function main() {
     console.info(`Processing file: ${argv.file} for content in the ${argv.folder} folder`);
     const processedLibrary = await processFile(xmlAsJson['library'], argv.folder);
     console.info('Done.');
-    console.log(`Exporting contents of ${argv.folder} to a new file.`);
+    console.info(`Exporting contents of ${argv.folder} to a new file.`);
+    console.info(xmlAsJson['library']['folder'].length);
+    console.info(processedLibrary['folder'].length);
+    console.info(xmlAsJson['library']['content'].length);
+    console.info(processedLibrary['content'].length);
     buildFile(xmlAsJson, processedLibrary)
     .then((fileName) => {
-        console.log(`Done. 
+        console.info(`Done. 
 Content from the ${argv.folder} folder in ${argv.file} has been successfully exported to ${fileName}.`);
     })
-    .catch(console.log);
-    console.warn('______WARNING: This script does not yet export content from the folder argument\'s subdirectories. ________')
+    .catch(console.info);
 }
 
 main();
