@@ -154,10 +154,6 @@ async function main() {
     const processedLibrary = await processFile(xmlAsJson['library'], argv.folder);
     console.info('Done.');
     console.info(`Exporting contents of ${argv.folder} to a new file.`);
-    console.info(xmlAsJson['library']['folder'].length);
-    console.info(processedLibrary['folder'].length);
-    console.info(xmlAsJson['library']['content'].length);
-    console.info(processedLibrary['content'].length);
     buildFile(xmlAsJson, processedLibrary)
     .then((fileName) => {
         console.info(`Done. 
