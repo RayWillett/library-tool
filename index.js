@@ -22,7 +22,6 @@ async function parseFile(file) {
 }
 
 function generateFolderPath (allFolders, targetId) {
-    // TODO: Get subdirectory folders;
     let path = [];
     let currentId = targetId;
     let currentFolder = {};
@@ -49,10 +48,9 @@ function getFoldersById(folders, targetId) {
 
 async function copyFolderContent(allContent, contentDirectories) {
     const filtered = allContent.filter((element, index) => {
-        const val = isInFolder(element, contentDirectories);
-        return val;//isInFolder(element, contentDirectories);
+        return isInFolder(element, contentDirectories);
     });
-    return Promise.resolve(filtered); // TODO: Get subdirectory content;
+    return Promise.resolve(filtered);
 }
 
 function isInFolder(content, contentDirectories) {
