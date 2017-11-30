@@ -56,9 +56,9 @@ async function copyFolderContent(allContent, contentDirectories) {
 function isInFolder(content, contentDirectories) {
     if (content['folder-links']) {
         return content['folder-links'].reduce((outerAcc, curr) => {
-            return outerAcc || curr['classification-link'].reduce((innerAcc, curr) => {
+            return outerAcc || (curr['classification-link'] && curr['classification-link'].reduce((innerAcc, curr) => {
                 return innerAcc || (contentDirectories.indexOf(curr['$']['folder-id']) > -1);
-            }, outerAcc);
+            }, outerAcc));
         }, false);
     }
     return false;
