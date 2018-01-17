@@ -10,7 +10,7 @@ const fs = require('fs'),
         .alias('subdirectories', 's')
         .argv;
 
-async function read_File(file) {
+async function read_File_With_Name(file) {
     return new Promise((resolve, reject) => fs.readFile(__dirname + file, (err, data) => resolve(data)))
     .catch((e) => console.error(e.message));
 }
