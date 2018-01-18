@@ -10,6 +10,8 @@ const fs = require('fs'),
         .alias('subdirectories', 's')
         .argv;
 
+        // Need to make a merge
+
 async function readFile(file) {
     return new Promise((resolve, reject) => fs.readFile(__dirname + file, (err, data) => resolve(data)))
     .catch((e) => console.error(e.message));
