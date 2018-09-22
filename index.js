@@ -1,3 +1,4 @@
+// The first change
 const fs = require('fs'),
     xml2js = require('xml2js'),
     argv = require('yargs')
@@ -9,6 +10,8 @@ const fs = require('fs'),
         .alias('file', 'f')
         .alias('subdirectories', 's')
         .argv;
+
+        //Some other needed change
 
 async function readFile(file) {
     return new Promise((resolve, reject) => fs.readFile(__dirname + file, (err, data) => resolve(data)))
