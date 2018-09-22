@@ -1,10 +1,9 @@
 var y = "new variable";
 
-
 const fs = require('fs'),
     xml2js = require('xml2js'),
     argv = require('yargs')
-        .usage('Usage: node $0 --file [string] --folder [folder-id] --subdirectories [boolean]')
+        .usage('Usags: node $0 --file [string] --folder [folder-id] --subdirectories [boolean]')
         .demandOption(['file', 'folder'])
         .boolean('subdirectories')
         .default('subdirectories', true)
